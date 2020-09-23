@@ -15,6 +15,7 @@ export default class GridRow extends Component {
         this.props.cells.map((cellItem)=>{
             cells.push(
                 <GridCell
+                    key={cellItem.key}
                     title={cellItem.title}
                     subtitle={cellItem.subtitle}
                     icon={cellItem.icon}

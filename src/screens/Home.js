@@ -1,19 +1,20 @@
 import React, { Component } from 'react'
-import { StyleSheet, Text, View, Image, FlatList } from 'react-native'
+import { StyleSheet, Text, View, Image, FlatList,TouchableOpacity, Modal, TextInput } from 'react-native'
 import images from './../config/images';
 import { spacing } from '../config/spacing';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Fontisto from 'react-native-vector-icons/Fontisto';
 import Feather from 'react-native-vector-icons/Feather';
 import Day from '../components/Day';
-import GridCell from '../components/GridCell';
 import GridRow from '../components/GridRow';
+import Locations from '../components/Locations';
 
 export default class Home extends Component {
     constructor(props){
         super(props)
 
         this.state = {
+            locationsOpen:false,
             today:{
                 date:{day:"Sun",number:"20"},
                 status:"sunny",
@@ -21,7 +22,7 @@ export default class Home extends Component {
             },
             todayDetails:[
                 {key:"1",title:"Sunny",header:true,icon:<Fontisto name="day-cloudy" size={33} color={"grey"}></Fontisto>},
-                {key:"2",title:"33",subtitle:"°C",now:true},
+                {key:"2",title:"33",subtitle:"°C",now:true,},
                 {key:"3",titles:["25°C","37°C"],tomorrow:true},
                 {key:"4",title:"49%",subtitle:"Humidity",icon:<Ionicons name="water-outline" size={30} color="grey"></Ionicons>},
                 {key:"5",title:"1,007mBar",subtitle:"Pressure",icon:<Ionicons name="speedometer-outline" size={30} color="grey"></Ionicons>},
@@ -70,8 +71,16 @@ export default class Home extends Component {
             ],
         }
 
+        this.closeLocations = this.closeLocations.bind(this)
         this.renderDetails = this.renderDetails.bind(this)
         this.renderWeek = this.renderWeek.bind(this)
+    }
+
+    componentDidMount = ()=>{
+    }
+
+    closeLocations = ()=>{
+        this.setState({locationsOpen:false})
     }
 
     renderDetails = ()=>{
@@ -93,12 +102,16 @@ export default class Home extends Component {
 
     renderWeek = ()=>{
         return (
-            <FlatList
-                data={this.state.week}
-                horizontal
-                keyExtractor={(item)=>item.id}
-                renderItem={({item})=><Day item={item}></Day>}
-            ></FlatList>
+            <View style={[spacing.flex,spacing.row,spacing.justifyContentCenter,spacing.alignItemsCenter]}>
+                <FlatList
+                    data={this.state.week}
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    showsVerticalScrollIndicator={false}
+                    keyExtractor={(item)=>item.id}
+                    renderItem={({item})=><Day item={item}></Day>}
+                ></FlatList>
+            </View>
         )
     }
 
@@ -111,20 +124,29 @@ export default class Home extends Component {
                     resizeMode="cover"
                 ></Image>
                 <View style={[spacing.lightBG,styles.data]}>
-                    <View style={styles.header}>
+                    <View style={spacing.row}>
                         <Text style={[styles.dataHeader,styles.date]}>Sunday, 19 May 2019 | 4:30PM</Text>
-                        <View style={[styles.dataHeader,styles.location]}>
+                        <TouchableOpacity 
+                            style={[styles.dataHeader,styles.location]}
+                            activeOpacity={0.5}
+                            onPress={()=>this.setState({locationsOpen:true})}    
+                        >
                             <Text style={styles.locationText}>Mumbai, India</Text>
                             <Ionicons name="location-sharp"  color={"#2196f3"} size={20}></Ionicons>
-                        </View>
+                        </TouchableOpacity>
                     </View>
                     <View style={spacing.flex}>
                         {this.renderDetails()}
-                        <View style={[spacing.flex,spacing.row,spacing.justifyContentCenter,spacing.alignItemsCenter]}>
-                            {this.renderWeek()}
-                        </View>
+                        {this.renderWeek()}
                     </View>
                 </View>
+                <Modal
+                    animationType="slide"
+                    visible={this.state.locationsOpen}
+                    onRequestClose={()=>this.closeLocations()}
+                >
+                    <Locations closeLocations={this.closeLocations}></Locations>
+                </Modal>
             </View>
         )
     }
@@ -143,12 +165,8 @@ const styles = StyleSheet.create({
         borderTopRightRadius:25,
         borderTopLeftRadius:25
     },
-    header:{
-        flexDirection:"row",
-    },
     dataHeader:{
-        paddingVertical:15,
-        paddingHorizontal:15,
+        padding:15,
     },
     date:{
         fontSize:15,
